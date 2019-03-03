@@ -1,251 +1,9 @@
 <roblox version="4">
-  <Item class="Folder" referent="2daff116-d58d-4a7c-a6f7-458a7e6d11d7">
+  <Item class="Folder" referent="4c0f7195-779e-436d-8763-cd8d767e2dea">
     <Properties>
       <string name="Name">Antimony</string>
     </Properties>
-    <Item class="Folder" referent="b271adb4-9ce0-436f-9206-cbcd57647da2">
-      <Properties>
-        <string name="Name">Plugs</string>
-      </Properties>
-      <Item class="ModuleScript" referent="18fd84de-d39e-4ed9-ae10-c15c3694c674">
-        <Properties>
-          <string name="Name">Fun</string>
-          <string name="Source">local Fun = {}
-
-local MarketplaceService = game:GetService("MarketplaceService")
-
-function Fun:register(antimony)
-	local sound = Instance.new("Sound", game.Workspace)
-	
-	sound.Played:connect(function(soundId)
-		local info = MarketplaceService:GetProductInfo(soundId:sub(14))
-			
-		antimony:globalSendChatMessage("You are now listening to: " .. info.Name, Color3.fromRGB(168, 192, 252))
-	end)
-	
-	local playSoundPerm = antimony:registerPermission("fun", "play")
-	local sparklesPerm = antimony:registerPermission("fun", "sparkles")
-	local forcefieldPerm = antimony:registerPermission("fun", "forcefield")
-	
-	antimony:registerCommand("play", function(ply, args)
-		if #args &lt; 1 then
-			antimony:sendChatMessage(ply, "Provide a sound ID to play! (" .. antimony.config.prefix .. "play &lt;sound asset ID>)")
-			return
-		end
-		
-		if sound.Playing then
-			sound:Stop()
-		end
-		
-		sound.SoundId = "rbxassetid://" .. args[1]
-		
-		if not sound.IsLoaded then
-			sound.Loaded:wait()
-		end
-		
-		sound:Play()
-	end, {
-		help = "Plays a sound.",
-		permission = playSoundPerm
-	})
-	
-	antimony:registerCommand("stop", function(ply, args)
-		sound:Stop()
-	end, {
-		help = "Stops playing sound.",
-		permission = playSoundPerm
-	})
-	
-	local function getTorso(ply)
-		local r6Torso = ply.Character:FindFirstChild("Torso")
-		local r15Torso = ply.Character:FindFirstChild("UpperTorso")
-		
-		if r6Torso then return r6Torso end
-		if r15Torso then return r15Torso end
-		
-		return nil
-	end
-	
-	antimony:registerCommand("sparkles", function(ply, args)
-		if antimony:hasPermission(ply, sparklesPerm) then
-			if #args > 0 then
-				local plys = antimony:searchPlayers(ply, args[1])
-				
-				for i, _ply in ipairs(plys) do
-					if not getTorso(_ply):FindFirstChild("Sparkles") then
-						local sparkles = Instance.new("Sparkles", getTorso(_ply))
-						sparkles.Enabled = true
-					end
-				end
-			else
-				if getTorso(ply):FindFirstChild("Sparkles") then return end
-				
-				local sparkles = Instance.new("Sparkles", getTorso(ply))
-				sparkles.Enabled = true
-			end
-		else
-			if getTorso(ply):FindFirstChild("Sparkles") then return end
-			
-			local sparkles = Instance.new("Sparkles", getTorso(ply))
-			sparkles.Enabled = true
-		end
-	end, {
-		help = "Gives you or another player sparkles.",
-		permission = function(ply)
-			return antimony:hasPermission(ply, sparklesPerm) or antimony:hasPremium(ply)
-		end
-	})
-	
-	antimony:registerCommand("unsparkles", function(ply, args)
-		if antimony:hasPermission(ply, sparklesPerm) then
-			if #args > 0 then
-				local plys = antimony:searchPlayers(ply, args[1])
-				
-				for i, _ply in ipairs(plys) do
-					local sparkles = getTorso(_ply):FindFirstChild("Sparkles")
-					if sparkles then sparkles:Destroy() end
-				end
-			else
-				local sparkles = getTorso(ply):FindFirstChild("Sparkles")
-				if sparkles then sparkles:Destroy() end
-			end
-		else
-			local sparkles = getTorso(ply):FindFirstChild("Sparkles")
-			if sparkles then sparkles:Destroy() end
-		end
-	end, {
-		help = "Removes your or another player's sparkles.",
-		permission = function(ply)
-			return antimony:hasPermission(ply, sparklesPerm) or antimony:hasPremium(ply)
-		end
-	})
-
-	antimony:registerCommand("forcefield", function(ply, args)
-		if antimony:hasPermission(ply, forcefieldPerm) then
-			if #args > 0 then
-				local plys = antimony:searchPlayers(ply, args[1])
-				
-				for i, _ply in ipairs(plys) do
-					if not getTorso(_ply):FindFirstChild("ForceField") then
-						local forcefield = Instance.new("ForceField", ply.Character)
-					end
-				end
-			else
-				if getTorso(ply):FindFirstChild("ForceField") then return end
-				
-				local forcefield = Instance.new("ForceField", ply.Character)
-			end
-		else
-			if getTorso(ply):FindFirstChild("ForceField") then return end
-			
-			local forcefield = Instance.new("ForceField", ply.Character)
-		end
-	end, {
-		help = "Gives you or another player a forcefield.",
-		permission = function(ply)
-			return antimony:hasPermission(ply, forcefieldPerm)
-		end,
-		aliases = { "ff" }
-	})
-	
-	antimony:registerCommand("unforcefield", function(ply, args)
-		if antimony:hasPermission(ply, forcefieldPerm) then
-			if #args > 0 then
-				local plys = antimony:searchPlayers(ply, args[1])
-				
-				for i, _ply in ipairs(plys) do
-					local forcefield = ply.Character:FindFirstChild("ForceField")
-					if forcefield then forcefield:Destroy() end
-				end
-			else
-				local forcefield = ply.Character:FindFirstChild("ForceField")
-				if forcefield then forcefield:Destroy() end
-			end
-		else
-			local forcefield = ply.Character:FindFirstChild("ForceField")
-			if forcefield then forcefield:Destroy() end
-		end
-	end, {
-		help = "Removes your or another player's forcefield.",
-		permission = function(ply)
-			return antimony:hasPermission(ply, forcefieldPerm)
-		end,
-		aliases = { "unff" }
-	})
-end
-
-return Fun</string>
-        </Properties>
-      </Item>
-      <Item class="ModuleScript" referent="93850efb-082e-4e53-9adf-607c9e4fcf07">
-        <Properties>
-          <string name="Name">Core</string>
-          <string name="Source">-- Core functionality for Antimony
-local Core = {}
-
-function Core:register(antimony)
-	local testCommandPerm = antimony:registerPermission("core", "test-command", true)
-	
-	antimony:registerCommand("test-command", function(ply, args)
-		for i, player in pairs(antimony:searchPlayers(ply, args[1])) do
-			antimony:sendChatMessage(ply, player.Name)
-		end
-	end, {
-		help = "A testing command.",
-		permission = testCommandPerm
-	})
-end
-
-return Core</string>
-        </Properties>
-      </Item>
-      <Item class="ModuleScript" referent="c9a96736-1c30-46ac-b6e2-7a8ceef8fb5d">
-        <Properties>
-          <string name="Name">Premium</string>
-          <string name="Source">-- this plug only provides the premium purchase command and the notification, it does not have any premium commands,
--- those are written in other plugs.
-local Premium = {}
-
-local MarketplaceService = game:GetService("MarketplaceService")
-local Players = game:GetService("Players")
-
-function Premium:register(antimony)
-	game.Workspace.AllowThirdPartySales = true
-	
-	antimony:registerCommand("premium", function(ply, args)
-		if MarketplaceService:UserOwnsGamePassAsync(ply.UserId, antimony.premiumGamepass) then
-			antimony:sendChatMessage(ply, "You are already Antimony Premium! Thank you! 💖", Color3.new(0, 1, 0))
-		else
-			MarketplaceService:PromptGamePassPurchase(ply, antimony.premiumGamepass) 
-		end
-	end, {
-		help = "Purchase Antimony Premium.",
-		permission = function() return true end -- disables permission check, however you can put logic in that function (e.g. checking permissions + marketplace service check)
-	})
-	
-	Players.PlayerAdded:connect(function(ply)
-		if MarketplaceService:UserOwnsGamePassAsync(ply.UserId, antimony.premiumGamepass) then
-			antimony:sendChatMessage(ply, "Thanks for supporting Antimony! 💖 You can use Antimony Premium commands.", Color3.new(0, 1, 0))
-		end
-	end)
-end
-
-return Premium</string>
-        </Properties>
-      </Item>
-    </Item>
-    <Item class="ModuleScript" referent="d0d96471-15d3-4cd4-86c5-9be9cb11351b">
-      <Properties>
-        <string name="Name">Config</string>
-        <string name="Source">-- Antimony Configuration
-
-return {
-	prefix = "!", -- The prefix for chat commands
-	devMode = false -- Development mode (shows debug lines)
-}</string>
-      </Properties>
-    </Item>
-    <Item class="Script" referent="8f252c4b-ac38-4119-b98c-6b0c9557ae63">
+    <Item class="Script" referent="474258df-ce4c-4231-92f8-f40486c59e90">
       <Properties>
         <string name="Name">Antimony</string>
         <string name="Source">--[[
@@ -629,7 +387,7 @@ end)
 
 Antimony:log(Antimony.level.info, "Antimony loaded ✨")</string>
       </Properties>
-      <Item class="LocalScript" referent="3435dac9-5677-4656-9cc2-d63dca723f12">
+      <Item class="LocalScript" referent="30578382-6e17-4f8c-879b-46df22136e11">
         <Properties>
           <string name="Name">Antimony Client</string>
           <string name="Source">-- Antimony Client-Side
@@ -653,6 +411,248 @@ AntimonyEvents.OnClientEvent:connect(function(data)
 		})
 	end
 end)</string>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="ModuleScript" referent="98b6235a-de7e-4184-9f30-1479c344bcd3">
+      <Properties>
+        <string name="Name">Config</string>
+        <string name="Source">-- Antimony Configuration
+
+return {
+	prefix = "!", -- The prefix for chat commands
+	devMode = false -- Development mode (shows debug lines)
+}</string>
+      </Properties>
+    </Item>
+    <Item class="Folder" referent="92a80d7a-138c-4409-88b6-dd9a31809b15">
+      <Properties>
+        <string name="Name">Plugs</string>
+      </Properties>
+      <Item class="ModuleScript" referent="f6afad94-6831-48ff-8e46-5c8ce203e4aa">
+        <Properties>
+          <string name="Name">Premium</string>
+          <string name="Source">-- this plug only provides the premium purchase command and the notification, it does not have any premium commands,
+-- those are written in other plugs.
+local Premium = {}
+
+local MarketplaceService = game:GetService("MarketplaceService")
+local Players = game:GetService("Players")
+
+function Premium:register(antimony)
+	game.Workspace.AllowThirdPartySales = true
+	
+	antimony:registerCommand("premium", function(ply, args)
+		if MarketplaceService:UserOwnsGamePassAsync(ply.UserId, antimony.premiumGamepass) then
+			antimony:sendChatMessage(ply, "You are already Antimony Premium! Thank you! 💖", Color3.new(0, 1, 0))
+		else
+			MarketplaceService:PromptGamePassPurchase(ply, antimony.premiumGamepass) 
+		end
+	end, {
+		help = "Purchase Antimony Premium.",
+		permission = function() return true end -- disables permission check, however you can put logic in that function (e.g. checking permissions + marketplace service check)
+	})
+	
+	Players.PlayerAdded:connect(function(ply)
+		if MarketplaceService:UserOwnsGamePassAsync(ply.UserId, antimony.premiumGamepass) then
+			antimony:sendChatMessage(ply, "Thanks for supporting Antimony! 💖 You can use Antimony Premium commands.", Color3.new(0, 1, 0))
+		end
+	end)
+end
+
+return Premium</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="b3e190b1-9a55-4603-9444-a39068288ada">
+        <Properties>
+          <string name="Name">Core</string>
+          <string name="Source">-- Core functionality for Antimony
+local Core = {}
+
+function Core:register(antimony)
+	local testCommandPerm = antimony:registerPermission("core", "test-command", true)
+	
+	antimony:registerCommand("test-command", function(ply, args)
+		for i, player in pairs(antimony:searchPlayers(ply, args[1])) do
+			antimony:sendChatMessage(ply, player.Name)
+		end
+	end, {
+		help = "A testing command.",
+		permission = testCommandPerm
+	})
+end
+
+return Core</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="3c17493e-2523-4341-811a-59cad342d74a">
+        <Properties>
+          <string name="Name">Fun</string>
+          <string name="Source">local Fun = {}
+
+local MarketplaceService = game:GetService("MarketplaceService")
+
+function Fun:register(antimony)
+	local sound = Instance.new("Sound", game.Workspace)
+	
+	sound.Played:connect(function(soundId)
+		local info = MarketplaceService:GetProductInfo(soundId:sub(14))
+			
+		antimony:globalSendChatMessage("You are now listening to: " .. info.Name, Color3.fromRGB(168, 192, 252))
+	end)
+	
+	local playSoundPerm = antimony:registerPermission("fun", "play")
+	local sparklesPerm = antimony:registerPermission("fun", "sparkles")
+	local forcefieldPerm = antimony:registerPermission("fun", "forcefield")
+	
+	antimony:registerCommand("play", function(ply, args)
+		if #args &lt; 1 then
+			antimony:sendChatMessage(ply, "Provide a sound ID to play! (" .. antimony.config.prefix .. "play &lt;sound asset ID>)")
+			return
+		end
+		
+		if sound.Playing then
+			sound:Stop()
+		end
+		
+		sound.SoundId = "rbxassetid://" .. args[1]
+		
+		if not sound.IsLoaded then
+			sound.Loaded:wait()
+		end
+		
+		sound:Play()
+	end, {
+		help = "Plays a sound.",
+		permission = playSoundPerm
+	})
+	
+	antimony:registerCommand("stop", function(ply, args)
+		sound:Stop()
+	end, {
+		help = "Stops playing sound.",
+		permission = playSoundPerm
+	})
+	
+	local function getTorso(ply)
+		local r6Torso = ply.Character:FindFirstChild("Torso")
+		local r15Torso = ply.Character:FindFirstChild("UpperTorso")
+		
+		if r6Torso then return r6Torso end
+		if r15Torso then return r15Torso end
+		
+		return nil
+	end
+	
+	antimony:registerCommand("sparkles", function(ply, args)
+		if antimony:hasPermission(ply, sparklesPerm) then
+			if #args > 0 then
+				local plys = antimony:searchPlayers(ply, args[1])
+				
+				for i, _ply in ipairs(plys) do
+					if not getTorso(_ply):FindFirstChild("Sparkles") then
+						local sparkles = Instance.new("Sparkles", getTorso(_ply))
+						sparkles.Enabled = true
+					end
+				end
+			else
+				if getTorso(ply):FindFirstChild("Sparkles") then return end
+				
+				local sparkles = Instance.new("Sparkles", getTorso(ply))
+				sparkles.Enabled = true
+			end
+		else
+			if getTorso(ply):FindFirstChild("Sparkles") then return end
+			
+			local sparkles = Instance.new("Sparkles", getTorso(ply))
+			sparkles.Enabled = true
+		end
+	end, {
+		help = "Gives you or another player sparkles.",
+		permission = function(ply)
+			return antimony:hasPermission(ply, sparklesPerm) or antimony:hasPremium(ply)
+		end
+	})
+	
+	antimony:registerCommand("unsparkles", function(ply, args)
+		if antimony:hasPermission(ply, sparklesPerm) then
+			if #args > 0 then
+				local plys = antimony:searchPlayers(ply, args[1])
+				
+				for i, _ply in ipairs(plys) do
+					local sparkles = getTorso(_ply):FindFirstChild("Sparkles")
+					if sparkles then sparkles:Destroy() end
+				end
+			else
+				local sparkles = getTorso(ply):FindFirstChild("Sparkles")
+				if sparkles then sparkles:Destroy() end
+			end
+		else
+			local sparkles = getTorso(ply):FindFirstChild("Sparkles")
+			if sparkles then sparkles:Destroy() end
+		end
+	end, {
+		help = "Removes your or another player's sparkles.",
+		permission = function(ply)
+			return antimony:hasPermission(ply, sparklesPerm) or antimony:hasPremium(ply)
+		end
+	})
+
+	antimony:registerCommand("forcefield", function(ply, args)
+		if antimony:hasPermission(ply, forcefieldPerm) then
+			if #args > 0 then
+				local plys = antimony:searchPlayers(ply, args[1])
+				
+				for i, _ply in ipairs(plys) do
+					if not getTorso(_ply):FindFirstChild("ForceField") then
+						local forcefield = Instance.new("ForceField", ply.Character)
+					end
+				end
+			else
+				if getTorso(ply):FindFirstChild("ForceField") then return end
+				
+				local forcefield = Instance.new("ForceField", ply.Character)
+			end
+		else
+			if getTorso(ply):FindFirstChild("ForceField") then return end
+			
+			local forcefield = Instance.new("ForceField", ply.Character)
+		end
+	end, {
+		help = "Gives you or another player a forcefield.",
+		permission = function(ply)
+			return antimony:hasPermission(ply, forcefieldPerm)
+		end,
+		aliases = { "ff" }
+	})
+	
+	antimony:registerCommand("unforcefield", function(ply, args)
+		if antimony:hasPermission(ply, forcefieldPerm) then
+			if #args > 0 then
+				local plys = antimony:searchPlayers(ply, args[1])
+				
+				for i, _ply in ipairs(plys) do
+					local forcefield = ply.Character:FindFirstChild("ForceField")
+					if forcefield then forcefield:Destroy() end
+				end
+			else
+				local forcefield = ply.Character:FindFirstChild("ForceField")
+				if forcefield then forcefield:Destroy() end
+			end
+		else
+			local forcefield = ply.Character:FindFirstChild("ForceField")
+			if forcefield then forcefield:Destroy() end
+		end
+	end, {
+		help = "Removes your or another player's forcefield.",
+		permission = function(ply)
+			return antimony:hasPermission(ply, forcefieldPerm)
+		end,
+		aliases = { "unff" }
+	})
+end
+
+return Fun</string>
         </Properties>
       </Item>
     </Item>

@@ -1,6 +1,10 @@
 <p align="center">
 <img src="/antimony.png">
-<h2>Antimony</h2>
+</p>
+
+<h1 align="center">Antimony</h1>
+
+<p align="center">
 An advanced, pluggable, open-source administration script for ROBLOX.
 </p>
 
