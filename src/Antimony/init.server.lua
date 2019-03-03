@@ -2,8 +2,6 @@
 	Antimony Admin
 	
 	An administration script by LewisTehMinerz.
-	
-	Looking for the config? Expand "Antimony" again in the Explorer.
 --]]
 
 local Antimony = {}

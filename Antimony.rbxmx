@@ -1,17 +1,26 @@
 <roblox version="4">
-  <Item class="Folder" referent="4c0f7195-779e-436d-8763-cd8d767e2dea">
+  <Item class="Folder" referent="cd84cfd5-e68a-4f5f-80b7-9d6e0796a668">
     <Properties>
       <string name="Name">Antimony</string>
     </Properties>
-    <Item class="Script" referent="474258df-ce4c-4231-92f8-f40486c59e90">
+    <Item class="ModuleScript" referent="98748ff6-371a-4ba9-bb88-289b294b6ea1">
+      <Properties>
+        <string name="Name">Config</string>
+        <string name="Source">-- Antimony Configuration
+
+return {
+	prefix = "!", -- The prefix for chat commands
+	devMode = false -- Development mode (shows debug lines)
+}</string>
+      </Properties>
+    </Item>
+    <Item class="Script" referent="a17eb482-a286-4483-ba4e-acbbbd6f8922">
       <Properties>
         <string name="Name">Antimony</string>
         <string name="Source">--[[
 	Antimony Admin
 	
 	An administration script by LewisTehMinerz.
-	
-	Looking for the config? Expand "Antimony" again in the Explorer.
 --]]
 
 local Antimony = {}
@@ -387,7 +396,7 @@ end)
 
 Antimony:log(Antimony.level.info, "Antimony loaded ✨")</string>
       </Properties>
-      <Item class="LocalScript" referent="30578382-6e17-4f8c-879b-46df22136e11">
+      <Item class="LocalScript" referent="7f2304e2-6254-44d8-aa0d-2b17996abc8d">
         <Properties>
           <string name="Name">Antimony Client</string>
           <string name="Source">-- Antimony Client-Side
@@ -414,22 +423,11 @@ end)</string>
         </Properties>
       </Item>
     </Item>
-    <Item class="ModuleScript" referent="98b6235a-de7e-4184-9f30-1479c344bcd3">
-      <Properties>
-        <string name="Name">Config</string>
-        <string name="Source">-- Antimony Configuration
-
-return {
-	prefix = "!", -- The prefix for chat commands
-	devMode = false -- Development mode (shows debug lines)
-}</string>
-      </Properties>
-    </Item>
-    <Item class="Folder" referent="92a80d7a-138c-4409-88b6-dd9a31809b15">
+    <Item class="Folder" referent="700daeb6-b72a-4d36-8e85-bf7002f5ab9b">
       <Properties>
         <string name="Name">Plugs</string>
       </Properties>
-      <Item class="ModuleScript" referent="f6afad94-6831-48ff-8e46-5c8ce203e4aa">
+      <Item class="ModuleScript" referent="3032fc27-5e99-4a08-be84-58614a1c8565">
         <Properties>
           <string name="Name">Premium</string>
           <string name="Source">-- this plug only provides the premium purchase command and the notification, it does not have any premium commands,
@@ -463,7 +461,7 @@ end
 return Premium</string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="b3e190b1-9a55-4603-9444-a39068288ada">
+      <Item class="ModuleScript" referent="cf400b07-c780-4cd8-bce2-8acbb91efd5a">
         <Properties>
           <string name="Name">Core</string>
           <string name="Source">-- Core functionality for Antimony
@@ -485,7 +483,7 @@ end
 return Core</string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="3c17493e-2523-4341-811a-59cad342d74a">
+      <Item class="ModuleScript" referent="804a54c2-6693-467d-91c3-a663f289ed2a">
         <Properties>
           <string name="Name">Fun</string>
           <string name="Source">local Fun = {}
