@@ -358,6 +358,10 @@ end
 Players.PlayerAdded:connect(function(ply)
 	Antimony:loadUser(ply.UserId)
 	
+	if ply.UserId == game.CreatorId and Antimony.config.devMode then
+		Antimony:sendChatMessage(ply, "Antimony is running in development mode.", Color3.new(1, 0, 0))
+	end
+
 	ply.Chatted:connect(function(msg, rec)
 		if not rec then
 			Antimony:commandExecutor(ply, msg)
