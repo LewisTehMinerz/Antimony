@@ -1,24 +1,160 @@
 <roblox version="4">
-  <Item class="Folder" referent="980736cf-a35d-41ba-85f5-bfb40e2138c9">
+  <Item class="Folder" referent="ef8a9950-074e-4c81-b973-42519a96873e">
     <Properties>
       <string name="Name">Antimony</string>
     </Properties>
-    <Item class="ModuleScript" referent="daa1d8bf-4a87-4dbf-88fc-d3268aab2865">
-      <Properties>
-        <string name="Name">Config</string>
-        <string name="Source">-- Antimony Configuration
-
-return {
-	prefix = "!", -- The prefix for chat commands
-	devMode = false -- Development mode (shows debug lines)
-}</string>
-      </Properties>
-    </Item>
-    <Item class="Folder" referent="35373c3e-2c27-4da1-9465-2fb9344f393a">
+    <Item class="Folder" referent="68c76213-94ad-4631-8af7-4de862c697be">
       <Properties>
         <string name="Name">Plugs</string>
       </Properties>
-      <Item class="ModuleScript" referent="b6b07a95-82eb-453f-a71c-73c36b8b4e14">
+      <Item class="ModuleScript" referent="9ba72d87-a666-4cb6-aef9-c6d7bb02034c">
+        <Properties>
+          <string name="Name">Premium</string>
+          <string name="Source">-- this plug only provides the premium purchase command and the notification, it does not have any premium commands,
+-- those are written in other plugs.
+local Premium = {}
+
+local MarketplaceService = game:GetService("MarketplaceService")
+local Players = game:GetService("Players")
+
+function Premium:register(antimony)
+	game.Workspace.AllowThirdPartySales = true
+	
+	antimony:registerCommand("premium", function(ply, args)
+		if MarketplaceService:UserOwnsGamePassAsync(ply.UserId, antimony.premiumGamepass) then
+			antimony:sendChatMessage(ply, "You are already Antimony Premium! Thank you! 💖", Color3.new(0, 1, 0))
+		else
+			MarketplaceService:PromptGamePassPurchase(ply, antimony.premiumGamepass) 
+		end
+	end, {
+		help = "Purchase Antimony Premium.",
+		permission = function() return true end -- disables permission check, however you can put logic in that function (e.g. checking permissions + marketplace service check)
+	})
+	
+	Players.PlayerAdded:connect(function(ply)
+		if MarketplaceService:UserOwnsGamePassAsync(ply.UserId, antimony.premiumGamepass) then
+			antimony:sendChatMessage(ply, "Thanks for supporting Antimony! 💖 You can use Antimony Premium commands.", Color3.new(0, 1, 0))
+		end
+	end)
+end
+
+return Premium</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="6ea864fc-82e3-484d-b98d-897b6de4950b">
+        <Properties>
+          <string name="Name">Admin</string>
+          <string name="Source">local Admin = {}
+
+local Players = game:GetService("Players")
+local DSS = game:GetService("DataStoreService")
+
+local BanStorage = DSS:GetDataStore("AntimonyBans")
+
+local bans = {}
+
+function Admin:register(antimony)
+    antimony:Log(antimony.levels.debug, "Loading bans from datastore")
+
+    local bansData
+
+    local success, error = pcall(function()
+        bansData = BanStorage:GetAsync("__INDEX__")
+    end)
+
+    if error then
+        antimony:Log(antimony.levels.error, "Error while loading bans: " .. error)
+    end
+
+    if bansData == nil then
+        bansData = {}
+
+        local success, error = pcall(function() 
+            BanStorage:SetAsync("__INDEX__", bansData)
+        end)
+    else
+        for i, userId in ipairs(bansData) do
+            local success, error = pcall(function()
+                bans[userId] = BanStorage:GetAsync(userId)
+            end)
+
+            if error then
+                antimony:Log(antimony.levels.error, "Error while loading " .. userId .. "'s bans: " .. error)
+            end
+        end
+    end
+
+    local banPerm = antimony:registerPermission("admin", "ban")
+
+    antimony:registerCommand("ban", function(ply, args)
+        local playerToBan = antimony:searchPlayers(args[0])
+
+        table.remove(args, 1)
+
+        local reason = table.concat(args, " ")
+
+        if #playerToBan > 0 then
+            for i, player in ipairs(playerToBan) do
+                for i, banInfo in ipairs(bans[player.UserId]) do
+                    if banInfo.active then banInfo.active = false end
+                end
+
+                table.insert(bans[player.UserId], {
+                    active = true,
+                    reason = reason,
+                    issuer = ply.Name,
+                    time = os.time()
+                })
+
+                local success, error = pcall(function()
+                    BanStorage:SetAsync(player.UserId, bans[player.UserId])
+
+                    local index = BanStorage:GetAsync("__INDEX__")
+
+                    local inIndex = false
+
+                    for i, userId in ipairs(index) do
+                        if userId == player.UserId then inIndex = true end
+                    end
+
+                    if not inIndex then
+                        table.insert(index, player.UserId)
+                        BanStorage:SetAsync("__INDEX__", index)
+                    end
+                end)
+
+                if error then
+                    antimony:sendChatMessage(ply, "An error occurred while saving ban data.", Color3.new(1, 0, 0))
+                    antimony:Log(antimony.level.error, "An error occurred while saving ban data: " .. error)
+                end
+
+                player:Kick("You are banned from the game.\n\nReason: " .. bans[player.UserId].reason .. "\nIssued by: " .. bans[player.UserId].issuer)
+            end
+            
+            antimony:sendChatMessage(ply, "User(s) have been banned.")
+        end
+    end,
+    {
+        info = "Ban a user.",
+        permission = banPerm
+    })
+
+    Players.PlayerAdded:connect(function(ply)
+        if bans[userId] then
+            for i, banInfo in ipairs(bans[userId]) do
+                if banInfo.active then
+                    ply:Kick("You are banned from the game.\n\nReason: " .. banInfo.reason .. "\nIssued by: " .. banInfo.issuer)
+                    return
+                end
+            end
+        end
+    end)
+end
+
+return Admin</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="2e35c326-6b70-4210-a390-a88962d0c4d2">
         <Properties>
           <string name="Name">Fun</string>
           <string name="Source">local Fun = {}
@@ -188,7 +324,7 @@ end
 return Fun</string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="3c2a9f0e-2628-4628-bf77-823a53706420">
+      <Item class="ModuleScript" referent="b6fcd853-a0a9-4629-93f2-0baf8e8801d9">
         <Properties>
           <string name="Name">Core</string>
           <string name="Source">-- Core functionality for Antimony
@@ -210,42 +346,19 @@ end
 return Core</string>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="f99fdb99-2f6a-4fc5-8f0c-9e3b7baa289a">
-        <Properties>
-          <string name="Name">Premium</string>
-          <string name="Source">-- this plug only provides the premium purchase command and the notification, it does not have any premium commands,
--- those are written in other plugs.
-local Premium = {}
-
-local MarketplaceService = game:GetService("MarketplaceService")
-local Players = game:GetService("Players")
-
-function Premium:register(antimony)
-	game.Workspace.AllowThirdPartySales = true
-	
-	antimony:registerCommand("premium", function(ply, args)
-		if MarketplaceService:UserOwnsGamePassAsync(ply.UserId, antimony.premiumGamepass) then
-			antimony:sendChatMessage(ply, "You are already Antimony Premium! Thank you! 💖", Color3.new(0, 1, 0))
-		else
-			MarketplaceService:PromptGamePassPurchase(ply, antimony.premiumGamepass) 
-		end
-	end, {
-		help = "Purchase Antimony Premium.",
-		permission = function() return true end -- disables permission check, however you can put logic in that function (e.g. checking permissions + marketplace service check)
-	})
-	
-	Players.PlayerAdded:connect(function(ply)
-		if MarketplaceService:UserOwnsGamePassAsync(ply.UserId, antimony.premiumGamepass) then
-			antimony:sendChatMessage(ply, "Thanks for supporting Antimony! 💖 You can use Antimony Premium commands.", Color3.new(0, 1, 0))
-		end
-	end)
-end
-
-return Premium</string>
-        </Properties>
-      </Item>
     </Item>
-    <Item class="Script" referent="ab1a771c-a9b8-43d0-a79d-9685c23e8c0d">
+    <Item class="ModuleScript" referent="d1178d7e-1404-40e3-a233-2b57bc2c0a5c">
+      <Properties>
+        <string name="Name">Config</string>
+        <string name="Source">-- Antimony Configuration
+
+return {
+	prefix = "!", -- The prefix for chat commands
+	devMode = false -- Development mode (shows debug lines)
+}</string>
+      </Properties>
+    </Item>
+    <Item class="Script" referent="ed6522c3-c6ff-4ab8-a656-7594bda08824">
       <Properties>
         <string name="Name">Antimony</string>
         <string name="Source">--[[
@@ -512,6 +625,8 @@ function Antimony:searchPlayers(ply, input)
 	local plys = {}
 	
 	for i, player in ipairs(Players:GetPlayers()) do
+		if player.UserId == input then return player end -- return player if the input is their user id
+
 		local playerMatch = player.Name:lower():sub(1, #input) == input:lower()
 		
 		if playerMatch then
@@ -631,7 +746,7 @@ end)
 
 Antimony:log(Antimony.level.info, "Antimony loaded ✨")</string>
       </Properties>
-      <Item class="LocalScript" referent="e678edeb-0089-485d-8a18-16fa04fe1a83">
+      <Item class="LocalScript" referent="836b051f-5e11-45af-b79c-a1dd42a030ba">
         <Properties>
           <string name="Name">Antimony Client</string>
           <string name="Source">-- Antimony Client-Side

@@ -262,6 +262,8 @@ function Antimony:searchPlayers(ply, input)
 	local plys = {}
 	
 	for i, player in ipairs(Players:GetPlayers()) do
+		if player.UserId == input then return player end -- return player if the input is their user id
+
 		local playerMatch = player.Name:lower():sub(1, #input) == input:lower()
 		
 		if playerMatch then
